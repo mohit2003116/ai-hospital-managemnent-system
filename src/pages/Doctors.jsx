@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { dataStore } from '../utils/dataStore';
 import { Plus, Edit2, Trash2, X, Search, Filter, Download, ChevronUp, ChevronDown } from 'lucide-react';
 import './Doctors.css';
 
@@ -10,14 +11,13 @@ const initialDoctors = [
 ];
 
 export default function Doctors() {
-  const [doctors, setDoctors] = useState(() => {
-    const saved = localStorage.getItem('hospital_doctors');
-    return saved ? JSON.parse(saved) : initialDoctors;
-  });
+  const [doctors, setDoctors] = useState(dataStore.getAll('doctors'));
   
   useEffect(() => {
-    localStorage.setItem('hospital_doctors', JSON.stringify(doctors));
-  }, [doctors]);
+    const refresh = () => setDoctors(dataStore.getAll('doctors'));
+    const unsubscribe = dataStore.subscribe(refresh);
+    return unsubscribe;
+  }, []);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentDoctor, setCurrentDoctor] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -64,21 +64,16 @@ export default function Doctors() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (currentDoctor) {
-      // Update
-      setDoctors(doctors.map(d => 
-        d.id === currentDoctor.id ? { ...formData, id: currentDoctor.id } : d
-      ));
+      dataStore.update('doctors', currentDoctor.id, formData);
     } else {
-      // Add
-      const newId = doctors.length > 0 ? Math.max(...doctors.map(d => d.id)) + 1 : 1;
-      setDoctors([...doctors, { ...formData, id: newId }]);
+      dataStore.add('doctors', formData);
     }
     handleCloseModal();
   };
 
   const handleDelete = (id) => {
     if (window.confirm('Are you sure you want to delete this doctor?')) {
-      setDoctors(doctors.filter(d => d.id !== id));
+      dataStore.delete('doctors', id);
     }
   };
 

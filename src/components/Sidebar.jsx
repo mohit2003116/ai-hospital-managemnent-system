@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
 import { 
   LayoutDashboard, 
   Users, 
@@ -12,10 +13,12 @@ import {
   Brain,
   FileText,
   MapPin,
-  Truck
+  Truck,
+  TestTube
 } from 'lucide-react';
 
 function Sidebar({ isOpen, onClose }) {
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -33,50 +36,58 @@ function Sidebar({ isOpen, onClose }) {
       <nav className="sidebar-nav">
         <NavLink to="/dashboard" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} onClick={onClose}>
           <LayoutDashboard size={20} />
-          <span>Dashboard</span>
+          <span>{t('dashboard')}</span>
         </NavLink>
         <NavLink to="/patients" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} onClick={onClose}>
           <Users size={20} />
-          <span>Patients</span>
+          <span>{t('patients')}</span>
         </NavLink>
         <NavLink to="/doctors" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} onClick={onClose}>
           <Stethoscope size={20} />
-          <span>Doctors</span>
+          <span>{t('doctors')}</span>
         </NavLink>
         <NavLink to="/appointments" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} onClick={onClose}>
           <Calendar size={20} />
-          <span>Appointments</span>
+          <span>{t('appointments')}</span>
         </NavLink>
         <NavLink to="/billing" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} onClick={onClose}>
           <CreditCard size={20} />
-          <span>Billing</span>
+          <span>{t('billing')}</span>
         </NavLink>
         <NavLink to="/symptom-checker" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} onClick={onClose}>
           <Brain size={20} />
-          <span>AI Checker</span>
+          <span>{t('diseasePredictor')}</span>
         </NavLink>
         <NavLink to="/prescriptions" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} onClick={onClose}>
           <FileText size={20} />
-          <span>Prescriptions</span>
+          <span>{t('prescriptions')}</span>
+        </NavLink>
+        <NavLink to="/lab-tests" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} onClick={onClose}>
+          <TestTube size={20} />
+          <span>{t('labTests')}</span>
         </NavLink>
         <NavLink to="/nearby-help" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} onClick={onClose}>
           <MapPin size={20} />
-          <span>Find Help</span>
+          <span>{t('findHelp')}</span>
         </NavLink>
         <NavLink to="/ambulance-tracking" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} onClick={onClose}>
           <Truck size={20} />
-          <span>Ambulances</span>
+          <span>{t('ambulances')}</span>
+        </NavLink>
+        <NavLink to="/queue-management" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} onClick={onClose}>
+          <Users size={20} />
+          <span>{t('queueManagement')}</span>
         </NavLink>
         <NavLink to="/settings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} onClick={onClose}>
           <Settings size={20} />
-          <span>Settings</span>
+          <span>{t('settings')}</span>
         </NavLink>
       </nav>
 
       <div className="sidebar-footer">
         <button className="nav-item" onClick={handleLogout} style={{ width: '100%', background: 'transparent', border: 'none', cursor: 'pointer' }}>
           <LogOut size={20} />
-          <span>Logout</span>
+          <span>{t('logout')}</span>
         </button>
       </div>
     </aside>

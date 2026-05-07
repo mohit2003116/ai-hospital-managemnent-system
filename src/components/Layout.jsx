@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { Menu, Bell, Search, User, Settings, LogOut, AlertTriangle, Phone, Stethoscope, FileText, Search as SearchIcon, X, Calendar as CalendarIcon, Pill, MapPin, Truck, ShieldAlert, Zap, Activity } from 'lucide-react';
+import { Menu, Bell, Search, User, Settings, LogOut, AlertTriangle, Phone, Stethoscope, FileText, Search as SearchIcon, X, Calendar as CalendarIcon, Pill, MapPin, Truck, ShieldAlert, Zap, Activity, TestTube } from 'lucide-react';
 import Sidebar from './Sidebar';
 import ChatAssistant from './ChatAssistant';
+import { useLanguage } from '../context/LanguageContext';
 
 function Layout() {
+  const { language, toggleLanguage, t } = useLanguage();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -88,6 +90,24 @@ function Layout() {
               desc: `Checkup for ${appt.patientName} due today`,
               time: 'Today',
               icon: <Activity size={16} />
+            });
+          }
+        });
+      }
+
+      // 4. Lab Results Notifications
+      const savedLabs = localStorage.getItem('hospital_lab_tests');
+      if (savedLabs) {
+        const labs = JSON.parse(savedLabs);
+        labs.forEach(lab => {
+          if (lab.status === 'Urgent') {
+            newNotifications.push({
+              id: `lab-${lab.id}`,
+              type: 'Urgent',
+              title: 'Urgent Lab Result',
+              desc: `${lab.patientName}: ${lab.type} result needs review`,
+              time: 'Immediate',
+              icon: <TestTube size={16} />
             });
           }
         });
@@ -179,8 +199,43 @@ function Layout() {
               title="Emergency Protocol (Ctrl+Alt+E)"
             >
               <AlertTriangle size={18} />
-              <span className="emergency-text">EMERGENCY</span>
+              <span className="emergency-text">{t('emergency')}</span>
             </button>
+
+            <div className="language-switcher" style={{ display: 'flex', gap: '0.25rem', backgroundColor: 'var(--bg-main)', padding: '0.25rem', borderRadius: '2rem', border: '1px solid var(--border-color)' }}>
+              <button 
+                onClick={() => toggleLanguage('en')}
+                style={{ 
+                  padding: '0.25rem 0.75rem', 
+                  borderRadius: '1.5rem', 
+                  fontSize: '0.75rem', 
+                  fontWeight: 600,
+                  border: 'none',
+                  cursor: 'pointer',
+                  backgroundColor: language === 'en' ? 'var(--primary)' : 'transparent',
+                  color: language === 'en' ? 'white' : 'var(--text-muted)',
+                  transition: 'all 0.2s'
+                }}
+              >
+                EN
+              </button>
+              <button 
+                onClick={() => toggleLanguage('hi')}
+                style={{ 
+                  padding: '0.25rem 0.75rem', 
+                  borderRadius: '1.5rem', 
+                  fontSize: '0.75rem', 
+                  fontWeight: 600,
+                  border: 'none',
+                  cursor: 'pointer',
+                  backgroundColor: language === 'hi' ? 'var(--primary)' : 'transparent',
+                  color: language === 'hi' ? 'white' : 'var(--text-muted)',
+                  transition: 'all 0.2s'
+                }}
+              >
+                हिन्दी
+              </button>
+            </div>
             <div style={{ position: 'relative' }}>
               <button 
                 onClick={toggleNotification}

@@ -1,31 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import { dataStore } from '../utils/dataStore';
 import { Plus, Search, FileText, Download, X, Eye, User, Stethoscope, Clock, Pill } from 'lucide-react';
 import './Doctors.css'; // Reusing common modal and table styles
 
 export default function Prescriptions() {
-  const [prescriptions, setPrescriptions] = useState(() => {
-    const saved = localStorage.getItem('hospital_prescriptions');
-    const initial = [
-      { 
-        id: 'RX-1001', 
-        patientName: 'Alice Cooper', 
-        doctorName: 'Dr. John Smith', 
-        date: '2026-05-04',
-        medicines: [
-          { name: 'Metformin', dosage: '500mg', duration: '30 days', instructions: 'Once daily after dinner' },
-          { name: 'Lisinopril', dosage: '10mg', duration: 'Ongoing', instructions: 'Once daily in morning' }
-        ]
-      }
-    ];
-    return saved ? JSON.parse(saved) : initial;
-  });
-
-  const [patients, setPatients] = useState(() => JSON.parse(localStorage.getItem('hospital_patients') || '[]'));
-  const [doctors, setDoctors] = useState(() => JSON.parse(localStorage.getItem('hospital_doctors') || '[]'));
+  const [prescriptions, setPrescriptions] = useState(dataStore.getAll('prescriptions'));
 
   useEffect(() => {
-    localStorage.setItem('hospital_prescriptions', JSON.stringify(prescriptions));
-  }, [prescriptions]);
+    const refresh = () => setPrescriptions(dataStore.getAll('prescriptions'));
+    const unsubscribe = dataStore.subscribe(refresh);
+    return unsubscribe;
+  }, []);
+
+  const [patients] = useState(() => dataStore.getAll('patients'));
+  const [doctors] = useState(() => dataStore.getAll('doctors'));
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);

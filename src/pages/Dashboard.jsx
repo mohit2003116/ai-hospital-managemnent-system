@@ -1,17 +1,38 @@
+import React from 'react';
 import { Users, UserPlus, Calendar, Activity, TrendingUp, Clock, Stethoscope, ClipboardList, PieChart as PieIcon, BarChart as BarIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   PieChart, Pie, Cell, Legend
 } from 'recharts';
+import { useLanguage } from '../context/LanguageContext';
 
 function Dashboard() {
+  const { t } = useLanguage();
   const navigate = useNavigate();
+  
+  // Local state for dashboard data
+  const [dashboardData, setDashboardData] = React.useState({
+    patients: JSON.parse(localStorage.getItem('hospital_patients') || '[]'),
+    doctors: JSON.parse(localStorage.getItem('hospital_doctors') || '[]'),
+    appointments: JSON.parse(localStorage.getItem('hospital_appointments') || '[]')
+  });
 
-  // Read actual data from localStorage
-  const patients = JSON.parse(localStorage.getItem('hospital_patients') || '[]');
-  const doctors = JSON.parse(localStorage.getItem('hospital_doctors') || '[]');
-  const appointments = JSON.parse(localStorage.getItem('hospital_appointments') || '[]');
+  const refreshData = () => {
+    setDashboardData({
+      patients: JSON.parse(localStorage.getItem('hospital_patients') || '[]'),
+      doctors: JSON.parse(localStorage.getItem('hospital_doctors') || '[]'),
+      appointments: JSON.parse(localStorage.getItem('hospital_appointments') || '[]')
+    });
+  };
+
+  React.useEffect(() => {
+    // Listen for data changes
+    window.addEventListener('hospitalDataChanged', refreshData);
+    return () => window.removeEventListener('hospitalDataChanged', refreshData);
+  }, []);
+
+  const { patients, doctors, appointments } = dashboardData;
 
   const today = new Date().toISOString().split('T')[0];
   const appointmentsToday = appointments.filter(a => a.date === today);
@@ -102,8 +123,8 @@ function Dashboard() {
   return (
     <div>
       <div className="dashboard-header">
-        <h1>Dashboard Overview</h1>
-        <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>Welcome back, here's what's happening today.</p>
+        <h1>{t('dashboard')} Overview</h1>
+        <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>{t('welcomeBack')}</p>
       </div>
 
       <div className="stats-grid">
@@ -112,7 +133,7 @@ function Dashboard() {
             <Users size={24} />
           </div>
           <div className="stat-details">
-            <h3>Total Patients</h3>
+            <h3>{t('totalPatients')}</h3>
             <div className="stat-value">{patients.length}</div>
             <div style={{ fontSize: '0.75rem', color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem' }}>
               <TrendingUp size={12} /> Active records
@@ -125,7 +146,7 @@ function Dashboard() {
             <Stethoscope size={24} />
           </div>
           <div className="stat-details">
-            <h3>Total Doctors</h3>
+            <h3>{t('totalDoctors')}</h3>
             <div className="stat-value">{doctors.length}</div>
             <div style={{ fontSize: '0.75rem', color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem' }}>
               <TrendingUp size={12} /> Available staff
@@ -138,7 +159,7 @@ function Dashboard() {
             <ClipboardList size={24} />
           </div>
           <div className="stat-details">
-            <h3>Total Appointments</h3>
+            <h3>{t('totalAppointments')}</h3>
             <div className="stat-value">{appointments.length}</div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
               Lifetime bookings
@@ -151,7 +172,7 @@ function Dashboard() {
             <Calendar size={24} />
           </div>
           <div className="stat-details">
-            <h3>Appointments Today</h3>
+            <h3>{t('appointmentsToday')}</h3>
             <div className="stat-value">{appointmentsToday.length}</div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
               {pendingAppointments.length} pending

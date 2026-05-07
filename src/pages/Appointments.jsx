@@ -1,21 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { dataStore } from '../utils/dataStore';
 import { Plus, Edit2, Trash2, X, Calendar as CalendarIcon, Clock, Search, Filter, Download, ChevronUp, ChevronDown, CreditCard, Smartphone, CheckCircle } from 'lucide-react';
 import './Doctors.css';
 
 export default function Appointments() {
-  const [appointments, setAppointments] = useState(() => {
-    const saved = localStorage.getItem('hospital_appointments');
-    // Default initial appointments if none in localStorage
-    const initialAppointments = [
-      { id: 1, patientName: 'Alice Cooper', doctorId: 1, date: '2026-05-04', time: '09:00', status: 'Scheduled', notes: 'Routine checkup', paymentStatus: 'Paid', amount: 150 },
-      { id: 2, patientName: 'Bob Marley', doctorId: 3, date: '2026-05-04', time: '10:30', status: 'Completed', notes: 'Follow-up', paymentStatus: 'Paid', amount: 200 },
-    ];
-    return saved ? JSON.parse(saved) : initialAppointments;
-  });
+  const [appointments, setAppointments] = useState(dataStore.getAll('appointments'));
 
   useEffect(() => {
-    localStorage.setItem('hospital_appointments', JSON.stringify(appointments));
-  }, [appointments]);
+    const refresh = () => setAppointments(dataStore.getAll('appointments'));
+    const unsubscribe = dataStore.subscribe(refresh);
+    return unsubscribe;
+  }, []);
 
   // Read doctors from localStorage to get the real list
   const allDoctors = JSON.parse(localStorage.getItem('hospital_doctors') || '[]');
@@ -49,7 +44,8 @@ export default function Appointments() {
     status: 'Scheduled',
     notes: '',
     paymentStatus: 'Pending',
-    amount: 150
+    amount: 150,
+    type: 'In-Person'
   });
 
   const handleOpenModal = (appt = null) => {
@@ -61,7 +57,8 @@ export default function Appointments() {
         date: appt.date,
         time: appt.time,
         status: appt.status,
-        notes: appt.notes || ''
+        notes: appt.notes || '',
+        type: appt.type || 'In-Person'
       });
     } else {
       setCurrentAppt(null);
@@ -71,7 +68,8 @@ export default function Appointments() {
         date: '', 
         time: '', 
         status: 'Scheduled', 
-        notes: '' 
+        notes: '',
+        type: 'In-Person'
       });
     }
     setIsModalOpen(true);
@@ -314,6 +312,15 @@ export default function Appointments() {
                     {appt.notes || '-'}
                   </td>
                   <td style={{ textAlign: 'right' }}>
+                    {appt.type === 'Video' && appt.status === 'Scheduled' && (
+                      <button 
+                        className="btn btn-primary" 
+                        style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem', marginRight: '0.5rem', gap: '0.4rem' }}
+                        onClick={() => navigate(`/video-consultation/${appt.id}`)}
+                      >
+                        <Smartphone size={14} /> Join Call
+                      </button>
+                    )}
                     <button className="btn-icon edit" onClick={() => handleOpenModal(appt)} title="Edit">
                       <Edit2 size={18} />
                     </button>
@@ -406,6 +413,20 @@ export default function Appointments() {
                     <option value="Completed">Completed</option>
                     <option value="Cancelled">Cancelled</option>
                   </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Consultation Type</label>
+                  <div style={{ display: 'flex', gap: '1rem' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.875rem' }}>
+                      <input type="radio" name="type" value="In-Person" checked={formData.type === 'In-Person'} onChange={handleChange} />
+                      In-Person
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.875rem' }}>
+                      <input type="radio" name="type" value="Video" checked={formData.type === 'Video'} onChange={handleChange} />
+                      Video Consultation
+                    </label>
+                  </div>
                 </div>
 
                 <div className="form-group">

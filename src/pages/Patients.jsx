@@ -18,8 +18,9 @@ export default function Patients() {
   const [patients, setPatients] = useState(dataStore.getAll('patients'));
   
   useEffect(() => {
-    // Keep internal state in sync if needed, though direct dataStore calls are better
-    setPatients(dataStore.getAll('patients'));
+    const refresh = () => setPatients(dataStore.getAll('patients'));
+    const unsubscribe = dataStore.subscribe(refresh);
+    return unsubscribe;
   }, []);
 
   const [isModalOpen, setIsModalOpen] = useState(false);

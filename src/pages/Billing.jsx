@@ -1,22 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import { dataStore } from '../utils/dataStore';
 import { Plus, Printer, FileText, X, DollarSign, Download } from 'lucide-react';
 import './Doctors.css';
 
 
 
 export default function Billing() {
-  const [bills, setBills] = useState(() => {
-    const saved = localStorage.getItem('hospital_bills');
-    const initialBills = [
-      { id: 1, patientName: 'Alice Cooper', doctorName: 'Dr. John Smith', date: '2026-05-04', treatmentCost: 150, tax: 15, totalAmount: 165, status: 'Paid' },
-      { id: 2, patientName: 'Bob Marley', doctorName: 'Dr. Michael Chen', date: '2026-05-04', treatmentCost: 200, tax: 20, totalAmount: 220, status: 'Pending' },
-    ];
-    return saved ? JSON.parse(saved) : initialBills;
-  });
+  const [bills, setBills] = useState(dataStore.getAll('bills'));
 
   useEffect(() => {
-    localStorage.setItem('hospital_bills', JSON.stringify(bills));
-  }, [bills]);
+    const refresh = () => setBills(dataStore.getAll('bills'));
+    const unsubscribe = dataStore.subscribe(refresh);
+    return unsubscribe;
+  }, []);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentBill, setCurrentBill] = useState(null); // For viewing/printing
   
@@ -52,20 +48,17 @@ export default function Billing() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const newId = bills.length > 0 ? Math.max(...bills.map(b => b.id)) + 1 : 1;
     const totalAmount = formData.treatmentCost + formData.tax;
-    
-    setBills([{ ...formData, id: newId, totalAmount }, ...bills]);
+    dataStore.add('bills', { ...formData, totalAmount });
     handleCloseModal();
   };
 
   const handlePrint = (bill) => {
-    // In a real app, this would trigger a print view or PDF generation
     alert(`Printing bill for ${bill.patientName}...\nTotal Amount: $${bill.totalAmount}`);
   };
 
   const handleMarkPaid = (id) => {
-    setBills(bills.map(b => b.id === id ? { ...b, status: 'Paid' } : b));
+    dataStore.update('bills', id, { status: 'Paid' });
   };
 
   const handleExport = () => {
