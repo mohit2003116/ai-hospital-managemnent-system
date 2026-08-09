@@ -1,9 +1,9 @@
 zerops:
-  - setup: static
+  - setup: static1
     build:
       base: nodejs@20
       buildCommands:
-        - npm ci
+        - npm install
         - npm run build
       deployFiles:
         - ./dist
